@@ -58,17 +58,11 @@ module.exports = function(content, file, conf){
 
     if(sameCss.exists()){
         css.push(sameCss.subpath);
-    }
+    }   
 
-        // var sameJs = feather.file.wrap(file.id.replace(/\.[^\.]+$/, '.js'));
+    file.extras.headJs = (file.extras.headJs || []).concat(headJs);
+    file.extras.bottomJs = (file.extras.bottomJs || []).concat(bottomJs);
+    file.extras.css = (file.extras.css || []).concat(css);
 
-        // if(sameJs.exists()){
-        //     bottomJs.push(sameJs.subpath);
-        // }          
-
-	file.extras.headJs = headJs;
-	file.extras.bottomJs = bottomJs;
-	file.extras.css = css;
-
-	return content;
+    return content;
 };
