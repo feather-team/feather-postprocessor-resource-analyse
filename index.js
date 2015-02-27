@@ -2,10 +2,24 @@ var RESOURCE_REG = /[\r\n]*(?:<!--[\s\S]*?-->|<script([^>]*?src=(['"])((?:<\?[\s
 var FIXED = /\b(?:feather-position|data|data-position)-fixed\b/i, HEAD = /\b(?:feather-position|data|data-position)-head\b/i, BOTTOM = /\b(?:feather-position|data|data-position)-bottom\b/i, DESTIGNORE = /\b(?:feather-position|data|data-position)-ignore\b/i;
 var ISCSS = /rel=["']?stylesheet['"]?/i;
 
-var PREVIEW_MODE = (feather.settings || {}).dest == 'preview';
+var PREVIEW_MODE = (feather.settings || {}).dest == 'preview', STATIC_MODE = feather.config.get('staticMode');
 
 module.exports = function(content, file, conf){
     var headJs = [], bottomJs = [], css = [], content = file.getContent();
+
+    if(!STATIC_MODE){
+        var analyses = content.match(/<?php \/\*FEATHER_RESOURCE_ANALYSE:([\s\S]+?)\*\/\?>/);
+
+        if(analyses){
+            var extras = (new Function('return ' + analyses[1]))();
+
+            file.extras.headJs = extras.headJs;
+            file.extras.bottomJs = extras.bottomJs;
+            file.extras.css = extras.css;
+
+            return content;
+        }
+    }
 
     // //将分析的requires添加至资源表中
     for(var i = 0; i < file.requires.length; i++){
@@ -39,7 +53,7 @@ module.exports = function(content, file, conf){
             }
 
             return '';
-        }else if(_4 && !FIXED.test(_4) && ISCSS.test(_4)){
+        }else if(_4 && ISCSS.test(_4)){
             if(!PREVIEW_MODE){
                 if(DESTIGNORE.test(_4)) return '';
             }
@@ -52,17 +66,25 @@ module.exports = function(content, file, conf){
         return _0;
     });
 
+    if(!file.isPageletLike){
+        var sameCss = feather.file.wrap(file.id.replace(/\.[^\.]+$/, '.css'));
 
-    var sameCss = feather.file.wrap(file.id.replace(/\.[^\.]+$/, '.css'));
-    
-
-    if(sameCss.exists()){
-        css.push(sameCss.subpath);
-    }   
+        if(sameCss.exists()){
+            css.push(sameCss.subpath);
+        }   
+    }
 
     file.extras.headJs = (file.extras.headJs || []).concat(headJs);
     file.extras.bottomJs = (file.extras.bottomJs || []).concat(bottomJs);
     file.extras.css = (file.extras.css || []).concat(css);
+
+    if(!STATIC_MODE){
+        content = '<?php /*FEATHER_RESOURCE_ANALYSE:' + feather.util.json({
+            headJs: file.extras.headJs,
+            bottomJs: file.extras.bottomJs,
+            css: file.extras.css
+        }) + '*/?>' + content;
+    }
 
     return content;
 };
