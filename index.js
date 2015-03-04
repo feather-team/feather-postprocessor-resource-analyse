@@ -3,12 +3,13 @@ var FIXED = /\b(?:feather-position|data|data-position)-fixed\b/i, HEAD = /\b(?:f
 var ISCSS = /rel=["']?stylesheet['"]?/i;
 
 var PREVIEW_MODE = (feather.settings || {}).dest == 'preview', STATIC_MODE = feather.config.get('staticMode');
+var USE_REQUIRE = feather.config.get('moduleLoader');
 
 module.exports = function(content, file, conf){
     var headJs = [], bottomJs = [], css = [], content = file.getContent();
 
     if(!STATIC_MODE){
-        var analyses = content.match(/<?php \/\*FEATHER_RESOURCE_ANALYSE:([\s\S]+?)\*\/\?>/);
+        var analyses = content.match(/<\?php \/\*FEATHER_RESOURCE_ANALYSE:([\s\S]+?)\*\/\?>/);
 
         if(analyses){
             var extras = (new Function('return ' + analyses[1]))();
@@ -17,7 +18,7 @@ module.exports = function(content, file, conf){
             file.extras.bottomJs = extras.bottomJs;
             file.extras.css = extras.css;
 
-            return content;
+            content = content.substring(analyses[0].length);
         }
     }
 
@@ -71,12 +72,20 @@ module.exports = function(content, file, conf){
 
         if(sameCss.exists()){
             css.push(sameCss.subpath);
-        }   
+        }
+
+        if(!USE_REQUIRE){
+            var sameJs = feather.file.wrap(file.id.replace(/\.[^\.]+$/, '.js'));  
+
+            if(sameJs.exists() && file.requires.indexOf(sameJs.subpath) == -1){
+                bottomJs.push(sameJs.subpath);
+            }
+        }
     }
 
-    file.extras.headJs = (file.extras.headJs || []).concat(headJs);
-    file.extras.bottomJs = (file.extras.bottomJs || []).concat(bottomJs);
-    file.extras.css = (file.extras.css || []).concat(css);
+    file.extras.headJs = feather.util.unique((file.extras.headJs || []).concat(headJs));
+    file.extras.bottomJs = feather.util.unique((file.extras.bottomJs || []).concat(bottomJs));
+    file.extras.css = feather.util.unique((file.extras.css || []).concat(css));
 
     if(!STATIC_MODE){
         content = '<?php /*FEATHER_RESOURCE_ANALYSE:' + feather.util.json({
