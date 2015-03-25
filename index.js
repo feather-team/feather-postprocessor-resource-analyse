@@ -6,6 +6,8 @@ var PREVIEW_MODE = (feather.settings || {}).dest == 'preview', STATIC_MODE = fea
 var USE_REQUIRE = feather.config.get('moduleLoader');
 
 module.exports = function(content, file, conf){
+    if(!file.isHtmlLike) return content;
+
     var headJs = [], bottomJs = [], css = [], content = file.getContent();
 
     if(!STATIC_MODE){
