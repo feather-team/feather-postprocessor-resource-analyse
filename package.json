@@ -1,6 +1,6 @@
 {
   "name": "feather-postprocessor-resource-analyse",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "feather resource analyse",
   "main": "index.js",
   "scripts": {

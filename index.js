@@ -3,7 +3,7 @@ var FIXED = /\b(?:feather-position|data|data-position)-fixed\b/i, HEAD = /\b(?:f
 var ISCSS = /rel=["']?stylesheet['"]?/i;
 
 var PREVIEW_MODE = (feather.settings || {}).dest == 'preview', STATIC_MODE = feather.config.get('staticMode');
-var USE_REQUIRE = feather.config.get('moduleLoader');
+var USE_REQUIRE = feather.config.get('require.use');
 
 module.exports = function(content, file, conf){
     if(!file.isHtmlLike) return content;
