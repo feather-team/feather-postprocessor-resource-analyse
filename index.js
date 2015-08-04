@@ -10,19 +10,19 @@ module.exports = function(content, file, conf){
 
     var headJs = [], bottomJs = [], css = [], content = file.getContent();
 
-    if(!STATIC_MODE){
-        var analyses = content.match(/<\?php \/\*FEATHER_RESOURCE_ANALYSE:([\s\S]+?)\*\/\?>/);
+    // if(!STATIC_MODE){
+    //     var analyses = content.match(/<\?php \/\*FEATHER_RESOURCE_ANALYSE:([\s\S]+?)\*\/\?>/);
 
-        if(analyses){
-            var extras = (new Function('return ' + analyses[1]))();
+    //     if(analyses){
+    //         var extras = (new Function('return ' + analyses[1]))();
 
-            file.extras.headJs = extras.headJs;
-            file.extras.bottomJs = extras.bottomJs;
-            file.extras.css = extras.css;
+    //         file.extras.headJs = extras.headJs;
+    //         file.extras.bottomJs = extras.bottomJs;
+    //         file.extras.css = extras.css;
 
-            content = content.substring(analyses[0].length);
-        }
-    }
+    //         content = content.substring(analyses[0].length);
+    //     }
+    // }
 
     // //将分析的requires添加至资源表中
     for(var i = 0; i < file.requires.length; i++){
@@ -89,13 +89,13 @@ module.exports = function(content, file, conf){
     file.extras.bottomJs = feather.util.unique((file.extras.bottomJs || []).concat(bottomJs));
     file.extras.css = feather.util.unique((file.extras.css || []).concat(css));
 
-    if(!STATIC_MODE){
-        content = '<?php /*FEATHER_RESOURCE_ANALYSE:' + feather.util.json({
-            headJs: file.extras.headJs,
-            bottomJs: file.extras.bottomJs,
-            css: file.extras.css
-        }) + '*/?>' + content;
-    }
+    // if(!STATIC_MODE){
+    //     content = '<?php /*FEATHER_RESOURCE_ANALYSE:' + feather.util.json({
+    //         headJs: file.extras.headJs,
+    //         bottomJs: file.extras.bottomJs,
+    //         css: file.extras.css
+    //     }) + '*/?>' + content;
+    // }
 
     return content;
 };
